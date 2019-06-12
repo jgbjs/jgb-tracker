@@ -1,0 +1,5 @@
+{
+  "usingComponents": {
+    "inner": "../../components/inner/index"
+  }
+}

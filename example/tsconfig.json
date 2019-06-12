@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "moduleResolution": "node",
+    "module": "es2015",
+    "target": "es5",
+    "allowJs": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "typeRoots": ["node_modules/@tuhu", "node_modules/@types"],
+    "lib": ["es2015", "es6", "es2017", "dom"],
+    "paths": {
+      "@jgbjs/tracker/*": ["../src/*"]
+    }
+  }
+}

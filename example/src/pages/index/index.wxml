@@ -1,0 +1,6 @@
+<button bind:tap="onGetEvent">get event</button>
+<button bind:tap="onGetDataset" data-test="test">get dataset</button>
+<button bind:tap="onGetApp">get app data</button>
+<button bind:tap="onGetUser">get user data [custom]</button>
+<inner></inner>
+<button bind:tap="onToIndex">to index</button>

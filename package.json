@@ -1,0 +1,30 @@
+{
+  "name": "@jgbjs/tracker",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "repository": "git@github.com:jgbjs/jgb-tracker.git",
+  "author": "蒋瑶 <landn172@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "files": ["lib"],
+  "devDependencies": {
+    "@types/jest": "^24.0.13",
+    "@types/lodash": "^4.14.123",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.14.0",
+    "typescript": "^3.3.3333"
+  },
+  "dependencies": {
+    "jgb-weapp": "^1.5.7",
+    "lodash": "^4.17.11",
+    "tslib": "^1.9.3"
+  },
+  "jest": {
+    "preset": "ts-jest"
+  }
+}

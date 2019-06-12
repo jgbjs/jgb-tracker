@@ -1,0 +1,18 @@
+{
+  "name": "jgb-template",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:jgbjs/jgb-template.git",
+  "author": "蒋瑶 <landn172@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "jgb build",
+    "watch": "jgb build --watch"
+  },
+  "devDependencies": {
+    "jgb-plugin-less": "^1.6.1",
+    "jgb-plugin-typescript": "^1.6.1",
+    "jgb-preset-weapp": "^1.6.1",
+    "jgb-weapp": "^1.5.5"
+  }
+}
