@@ -1,0 +1,9 @@
+language: node_js
+sudo: required
+cache:
+  npm: true
+  yarn: true
+node_js:
+  - lts/*
+script:
+  - yarn && yarn build && yarn run test
