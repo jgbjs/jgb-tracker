@@ -8,6 +8,7 @@ export type IMapFunction = Map<string, Function>;
 export interface ICollectData {
   eventName: string;
   data: any;
+  [key: string]: any;
 }
 
 export type INotify = (collect: ICollectData) => any;
@@ -66,10 +67,10 @@ export class Collector {
           reportData[key] = this.getData(valuePath, args, ctx);
         }
 
-        const collectData = Object.create(null, {
-          data: { value: reportData },
-          eventName: { value: eventName }
-        });
+        const collectData = {
+          ...m,
+          data: reportData
+        };
         this.notify(collectData);
       },
       Collector.MS,
