@@ -171,7 +171,7 @@ export function registerCollect(
  * 获取对应的数据
  *  $APP.a => getApp().a
  *  $DATASET.b => e.currentTarget.dataset.b
- *  c => this.data.c
+ *  $DATA.c => this.data.c
  * @param args 方法的参数
  * @param ctx page or component 实例
  * @param path 获取数据路径
@@ -237,6 +237,7 @@ export function getData(path: string, args: any[], ctx: any) {
     );
   }
 
+  // app onLaunch options
   if (path.startsWith('$APPOPTIONS.')) {
     const app = getApp() as any;
     return safeGet(
@@ -246,6 +247,12 @@ export function getData(path: string, args: any[], ctx: any) {
       path
     );
   }
+
   // 获取data上数据
-  return safeGet(ctx.data, path);
+  if (path.startsWith('$DATA.')) {
+    return safeGet({ $DATA: ctx.data }, path);
+  }
+
+  // 默认直接返回改值
+  return path;
 }

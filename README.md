@@ -6,17 +6,19 @@
 
 - 支持本地文件或远程文件配置
 - 支持组件及页面方法配置
-- 内置通用数据 `$APP`、 `$DATASET`、 `$EVENT`、 `$OPTIONS`等
+- 内置通用数据 `$APP`、 `$DATA`、`$DATASET`、 `$EVENT`、 `$OPTIONS`等
 - 支持自定义数据
 
 ### 内置通用数据定义
 
-| 名称      | 描述               |     |
-| --------- | ------------------ | --- |
-| \$APP     | getApp()的数据     |     |
-| \$DATASET | 事件的 dataset     |     |
-| \$EVENT   | 事件的 event       |     |
-| \$OPTIONS | 当前页面的 options |     |
+| 名称        | 描述                      |      |
+| ----------- | ------------------------- | ---- |
+| \$APP       | getApp()的数据            |      |
+| \$DATASET   | 事件的 *dataset*          |      |
+| \$EVENT     | 事件的 *event*            |      |
+| \$OPTIONS   | 当前页面的 *options*      |      |
+| $DATA       | 当前页面或者组件的 *data* |      |
+| $APPOPTIONS | App.onLaunch的options     |      |
 
 ## 安装
 

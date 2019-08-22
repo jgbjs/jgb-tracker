@@ -7,6 +7,7 @@
   "author": "蒋瑶 <landn172@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "prebuild": "rm -rf lib",
     "build": "tsc -p tsconfig.json",
     "test": "jest"
   },
