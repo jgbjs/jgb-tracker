@@ -101,7 +101,14 @@ describe('custom getDataProcessor', () => {
 
 describe('get page or component data', () => {
   it('page data', () => {
-    const result = getData('api', [event], pageCtx);
+    const result = getData('$DATA.api', [event], pageCtx);
     expect(result).toBe('myapi');
+  });
+});
+
+describe('get this raw data', () => {
+  it('raw data', () => {
+    const result = getData('原始数据', [], null);
+    expect(result).toBe('原始数据');
   });
 });

@@ -13,7 +13,7 @@ export class CacheManage {
   getCache() {
     return jgb.getStorage({
       key: this.cacheKey
-    });
+    }).catch();
   }
 }
 

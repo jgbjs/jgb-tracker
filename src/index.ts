@@ -1,25 +1,30 @@
 import { JApp, JComponent, JPage } from 'jgb-weapp';
-import { addGetDataProcessor, addNotify, privateAppOptions, privateOptions } from './collect';
+import {
+  addGetDataProcessor,
+  addNotify,
+  privateAppOptions,
+  privateOptions
+} from './collect';
 import { addProcessConfigFn, config, IConfig } from './config';
 import { safeGet } from './utils';
 
 export default {
+  /** 加载配置  */
+  loadConfig(opts: { configUrl?: string; localConfig?: IConfig }) {
+    return config.load((opts.configUrl || opts.localConfig) as any);
+  },
   /**
    * init tracker
    * @param opts.configUrl 请求埋点配置路径
    * @param opts.localConfig 本地配置
    */
   init(opts: { configUrl?: string; localConfig?: IConfig }) {
-    if (opts.configUrl) {
-      config.load(opts.configUrl);
-    } else if (opts.localConfig) {
-      config.load(opts.localConfig);
-    } else {
-      return this;
-    }
+    const configLoadPromise = this.loadConfig(opts);
 
-    // 标志是否已经初始化
-    const $FLAG: string = Symbol('flag') as any;
+    // 标志是否已经加载config
+    let HAS_LOAD_CONFIG = false;
+    // 未加载config之前已经attached的component
+    const components = new Set();
 
     JApp.mixin({
       onLaunch(options: any) {
@@ -29,31 +34,36 @@ export default {
 
     JPage.mixin({
       onLoad(options: any) {
-        this[$FLAG] = true;
         this[privateOptions] = options;
-        config.injectPage(this);
-      },
-      onShow() {
-        if (!this[$FLAG]) {
-          return;
-        }
         config.injectPage(this);
       }
     });
 
     JComponent.mixin({
       attached() {
-        this[$FLAG] = true;
+        if (!HAS_LOAD_CONFIG) {
+          components.add(this);
+        }
+
         config.injectComponent(this);
       },
-      pageLifetimes: {
-        show(this: any) {
-          if (!this[$FLAG]) {
-            return;
-          }
-          config.injectComponent(this);
+      detached() {
+        if (!HAS_LOAD_CONFIG) {
+          components.delete(this);
         }
       }
+    });
+
+    // 补全缺失的埋点
+    configLoadPromise.then(() => {
+      HAS_LOAD_CONFIG = true;
+      const pages = getCurrentPages();
+      if (pages.length === 0) {
+        return;
+      }
+      pages.forEach(page => config.injectPage(page));
+
+      components.forEach(component => config.injectComponent(component));
     });
 
     return this;
@@ -65,4 +75,3 @@ export default {
 };
 
 export { safeGet };
-

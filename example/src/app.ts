@@ -1,9 +1,12 @@
 import Tracker, { safeGet } from '@jgbjs/tracker/index';
 import { JApp } from 'jgb-weapp';
 
+// @ts-ignore
+wx.Tracker = Tracker;
+
 Tracker.init({
-  configUrl: 'https://img1.tuhu.org/mp/FgkkWNeIlgl1HXf8dlk2_6Bms-zA.json',
-  // configUrl: 'https://img1.tuhu.org/mp/Ft0UUW95MeADNxe1AnmCUTSVOMY3.json'
+  configUrl: 'https://img1.tuhu.org/mp/FpWaDvNhHCt4tZCznH3gSCOdz-6T.json',
+  // configUrl: 'https://img1.tuhu.org/mp/FlT0NXc5Ek2HjehV1gEmYehNlL6L.json',
   // localConfig: {
   //   tracks: [
   //     {

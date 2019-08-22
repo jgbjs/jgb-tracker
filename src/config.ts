@@ -98,17 +98,13 @@ export class TrackerConfig {
 
       const localCacheTask = async () => {
         const cache = await cacheManage.getCache();
-        if (cache.data) {
+        if (cache && cache.data) {
           this.config = cache.data as IConfig;
         }
       };
 
       const rq = requestTask();
-      await Promise.race([rq, localCacheTask()]);
-
-      if (!this.config) {
-        await rq;
-      }
+      await Promise.all([rq, localCacheTask()]);
     } else {
       this.config = urlorConfig;
     }
@@ -150,7 +146,7 @@ export class TrackerConfig {
     const c = this.config;
     const { path } = normalizePath(url);
 
-    return c.tracks.find((t) => t.path === path);
+    return c.tracks.find(t => t.path === path);
   }
 
   /**
@@ -239,7 +235,7 @@ export class TrackerConfig {
 
       for (const component of c.components) {
         if (component.path === is) {
-          (component.methods || []).forEach((m) => {
+          (component.methods || []).forEach(m => {
             const path = `${route}#${is}`;
             this.injectMethod(ctx, m, collector, path);
           });
