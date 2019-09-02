@@ -94,7 +94,7 @@ Tracker.addNotify(data => {
 
 返回的数据就是`methods`中的数据，其中`data`为采集到的数据
 
-```json
+```js
 {
   method,
   eventName,
@@ -194,17 +194,15 @@ const json = {
 
 * 字符串
 
-  ```json
-  {
-  	test: "'我是测试'"
-  }
-  ```
-
-  
+```js
+ {
+  test: "'我是测试'"
+ }
+```
 
 * 算数运算符( + , - , * , / ）
 
-```json
+```js
 {
   test: '$DATASET.item.index + 1'
 }
@@ -212,7 +210,7 @@ const json = {
 
 * 三目运算
 
-```json
+```js
 {
   test: '$DATASET.item.index > 0 ? $DATASET.item.value : $DATASET.item.key'
 }
