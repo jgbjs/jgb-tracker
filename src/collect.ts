@@ -1,5 +1,7 @@
 import throttle from 'lodash/throttle';
 import { IConfigComponentItem, IConfigMethod, IConfigPageItem } from './config';
+import { Context } from './expression/context';
+import { runInConext } from './expression/index';
 import { getCurrentPage, hasCode, safeGet } from './utils';
 
 // tslint:disable-next-line: ban-types
@@ -135,22 +137,6 @@ export class Collector {
 export const collector = new Collector();
 
 /**
- * 增加处理获取数据的处理方法
- * 返回直接处理过的result
- * @param fn
- * @example
- * // 我们要获取登录信息， 预设标识$USER.xxx
- * addGetDataProcessor((path) => {
- *  if(path.startsWith('$USER.')){
- *    return [true, _.get({$USER:getUserInfo()},path)]
- *  }
- * })
- */
-export function addGetDataProcessor(fn: IDataProcessor) {
-  getDataProcessors.push(fn);
-}
-
-/**
  * 增加触发事件通知
  * @example
  * addNotify((data) => {
@@ -167,6 +153,19 @@ export function registerCollect(
   const hash = hasCode(JSON.stringify(config));
   return { hash, collector };
 }
+
+const globalContextFns: any[] = [];
+
+/**
+ * 添加全局预设值
+ */
+export function addGlobalContext(fn: () => { [key: string]: any }) {
+  if (typeof fn !== 'function') {
+    return;
+  }
+  globalContextFns.push(fn);
+}
+
 /**
  * 获取对应的数据
  *  $APP.a => getApp().a
@@ -176,83 +175,36 @@ export function registerCollect(
  * @param ctx page or component 实例
  * @param path 获取数据路径
  */
-export function getData(path: string, args: any[], ctx: any) {
-  // 优先处理注册的 数据的处理方法
-  for (const fn of getDataProcessors) {
-    const ret = fn(path, args, ctx);
-    if (!ret) {
-      continue;
-    }
-    const [isSuccess, result] = ret;
-    if (isSuccess) {
-      return result;
-    }
-  }
+export function getData(path: string, args: any[], ctx: any = {}) {
   const event = args[0];
+  const curPage = getCurrentPage() as any;
+  const app = getApp();
+  const globalContext = globalContextFns.reduce(
+    (obj, fn) => Object.assign(obj, fn()),
+    {}
+  );
+  const context = new Context(globalContext);
+  context.addContext({
+    // 获取app实例的数据
+    $APP: app,
+    // 获取wxml中data-*系列属性的值
+    $DATASET: safeGet(event, 'currentTarget.dataset'),
+    // 事件
+    $EVENT: event,
+    // page options
+    $OPTIONS:
+      (ctx && ctx[privateOptions]) || (curPage && curPage[privateOptions]),
+    // app onLaunch options
+    $APPOPTIONS: app && app[privateAppOptions],
+    // 获取data上数据
+    $DATA: ctx && ctx.data
+  });
 
-  // 获取app实例的数据
-  if (path.startsWith('$APP.')) {
-    return safeGet(
-      {
-        $APP: getApp()
-      },
-      path
-    );
+  try {
+    const result = runInConext(path, context);
+    return result;
+  } catch {
+    // 默认直接返回改值
+    return path;
   }
-  // 获取wxml中data-*系列属性的值
-  if (path.startsWith('$DATASET.')) {
-    const dataset = safeGet(event, 'currentTarget.dataset');
-    if (!dataset) {
-      return;
-    }
-    return safeGet(
-      {
-        $DATASET: dataset
-      },
-      path
-    );
-  }
-  // 事件
-  if (path.startsWith('$EVENT.')) {
-    return safeGet(
-      {
-        $EVENT: event
-      },
-      path
-    );
-  }
-
-  // page options
-  if (path.startsWith('$OPTIONS.')) {
-    const curPage = getCurrentPage() as any;
-    return safeGet(
-      {
-        $OPTIONS: ctx[privateOptions]
-          ? ctx[privateOptions]
-          : curPage
-          ? curPage[privateOptions]
-          : {}
-      },
-      path
-    );
-  }
-
-  // app onLaunch options
-  if (path.startsWith('$APPOPTIONS.')) {
-    const app = getApp() as any;
-    return safeGet(
-      {
-        $APPOPTIONS: app[privateAppOptions]
-      },
-      path
-    );
-  }
-
-  // 获取data上数据
-  if (path.startsWith('$DATA.')) {
-    return safeGet({ $DATA: ctx.data }, path);
-  }
-
-  // 默认直接返回改值
-  return path;
 }
