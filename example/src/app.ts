@@ -5,7 +5,7 @@ import { JApp } from 'jgb-weapp';
 wx.Tracker = Tracker;
 
 Tracker.init({
-  configUrl: 'https://img1.tuhu.org/mp/FpWaDvNhHCt4tZCznH3gSCOdz-6T.json',
+  configUrl: 'https://img1.tuhu.org/mp/FpWaDvNhHCt4tZCznH3gSCOdz-6T.json'
   // configUrl: 'https://img1.tuhu.org/mp/FlT0NXc5Ek2HjehV1gEmYehNlL6L.json',
   // localConfig: {
   //   tracks: [
@@ -75,19 +75,12 @@ Tracker.init({
 Tracker.addNotify(data => {
   console.log(data);
 });
-Tracker.addGetDataProcessor((path, args, ctx) => {
-  if (path.startsWith('$USER')) {
-    return [
-      true,
-      safeGet(
-        {
-          userId: 'xxxx.xxxx'
-        },
-        path.replace('$USER.', '')
-      )
-    ];
+
+Tracker.addGlobalContext(() => ({
+  $USER: {
+    userId: 'xxxx.xxxx'
   }
-});
+}));
 
 JApp({
   global: {

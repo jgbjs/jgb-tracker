@@ -8,6 +8,7 @@
 - 支持组件及页面方法配置
 - 内置通用数据 `$APP`、 `$DATA`、`$DATASET`、 `$EVENT`、 `$OPTIONS`等
 - 支持自定义数据
+- 支持数据表达式
 
 ### 内置通用数据定义
 
@@ -19,6 +20,8 @@
 | \$OPTIONS   | 当前页面的 *options*      |      |
 | $DATA       | 当前页面或者组件的 *data* |      |
 | $APPOPTIONS | App.onLaunch的options     |      |
+
+
 
 ## 安装
 
@@ -41,24 +44,92 @@ Tracker.init({
 Tracker.addNotify(data => {
   console.log(data);
 });
+```
 
-// 追加自定义数据匹配
-Tracker.addGetDataProcessor((path, args, ctx) => {
-  if (path.startsWith('$USER')) {
-    return [
-      true,
-      safeGet(
-        {
-          userId: 'xxxx.xxxx'
-        },
-        path.replace('$USER.', '')
-      )
-    ];
-  }
+### 方法
+
+#### init
+
+初始化
+
+* 加载远程配置
+
+```ts
+Tracker.init({
+  configUrl: 'https://xxx'
 });
 ```
 
-### Tracker 数据结构
+* 加载本地配置
+
+```ts
+Tracker.init({
+  localConfig: {
+    path: 'pages/xx/xx',
+    methods: [{
+       // 页面中事件名称
+       method: 'onTap',
+       // 采集上报的事件名
+       eventName: 'tapxxx',
+       // 需要采集的数据
+       data: {
+         dataname: '$EVENT.type'
+       }
+    }]
+  }
+})
+```
+
+#### addNotify
+
+回调通知
+
+```ts
+Tracker.addNotify(data => {
+  console.log(data);
+});
+```
+
+* 返回数据
+
+返回的数据就是`methods`中的数据，其中`data`为采集到的数据
+
+```json
+{
+  method,
+  eventName,
+  data
+}
+```
+
+#### addGlobalContext
+
+增加全局预设值(数据定义)
+
+```ts
+Tracker.addGlobalContext(() => {
+  return {
+    '$User':{
+      id: 'xxxx'
+    }
+  }
+})
+```
+
+#### addProcessConfigFn
+
+添加返回数据处理，默认不处理。有些情况下数据结构需要做处理，符合配置需要的[数据结构](#数据结构)
+
+```ts
+Tracker.addProcessConfigFn((config) => {
+  // do something then return config
+  return config
+})
+```
+
+
+
+### 数据结构
 
 ```js
 const json = {
@@ -116,3 +187,39 @@ const json = {
   ]
 };
 ```
+
+### 表达式
+
+通常我们只需要配置预设值即可拿到所需数据，但一些其他情况我们需要支持表达式。
+
+* 字符串
+
+  ```json
+  {
+  	test: "'我是测试'"
+  }
+  ```
+
+  
+
+* 算数运算符( + , - , * , / ）
+
+```json
+{
+  test: '$DATASET.item.index + 1'
+}
+```
+
+* 三目运算
+
+```json
+{
+  test: '$DATASET.item.index > 0 ? $DATASET.item.value : $DATASET.item.key'
+}
+```
+
+* 关系运算符（ > ，< ，== ，!= ，>= ，<= ）
+
+* 逻辑运算符 ( ! , && , || )
+
+* 系统方法 （Number, String ….）

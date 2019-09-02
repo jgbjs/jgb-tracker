@@ -146,7 +146,7 @@ export class TrackerConfig {
     const c = this.config;
     const { path } = normalizePath(url);
 
-    return c.tracks.find(t => t.path === path);
+    return c.tracks.find((t) => t.path === path);
   }
 
   /**
@@ -235,7 +235,7 @@ export class TrackerConfig {
 
       for (const component of c.components) {
         if (component.path === is) {
-          (component.methods || []).forEach(m => {
+          (component.methods || []).forEach((m) => {
             const path = `${route}#${is}`;
             this.injectMethod(ctx, m, collector, path);
           });

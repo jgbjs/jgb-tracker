@@ -1,4 +1,4 @@
-import { addGetDataProcessor, getData, privateOptions } from '../src/collect';
+import { addGlobalContext, getData, privateOptions } from '../src/collect';
 import { safeGet } from '../src/utils';
 // @ts-ignore
 global.getApp = () => {
@@ -77,21 +77,11 @@ describe('$OPTIONS', () => {
 });
 
 describe('custom getDataProcessor', () => {
-  addGetDataProcessor((path, args, ctx) => {
-    if (path.startsWith('$TEST.')) {
-      return [
-        true,
-        safeGet(
-          {
-            $TEST: {
-              test: 'test'
-            }
-          },
-          path
-        )
-      ];
+  addGlobalContext(() => ({
+    $TEST: {
+      test: 'test'
     }
-  });
+  }));
 
   it('$TEST.test', () => {
     const result = getData('$TEST.test', [event], pageCtx);
@@ -108,7 +98,7 @@ describe('get page or component data', () => {
 
 describe('get this raw data', () => {
   it('raw data', () => {
-    const result = getData('原始数据', [], null);
+    const result = getData("'原始数据'", [], null);
     expect(result).toBe('原始数据');
   });
 });

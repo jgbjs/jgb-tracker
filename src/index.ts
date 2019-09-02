@@ -1,6 +1,6 @@
 import { JApp, JComponent, JPage } from 'jgb-weapp';
 import {
-  addGetDataProcessor,
+  addGlobalContext,
   addNotify,
   privateAppOptions,
   privateOptions
@@ -68,8 +68,7 @@ export default {
 
     return this;
   },
-
-  addGetDataProcessor,
+  addGlobalContext,
   addNotify,
   addProcessConfigFn
 };
