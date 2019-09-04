@@ -108,8 +108,6 @@ export class TrackerConfig {
     } else {
       this.config = urlorConfig;
     }
-
-    cacheManage.setCache(this.config);
   }
   /**
    * 加载配置
