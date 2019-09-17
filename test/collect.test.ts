@@ -1,5 +1,4 @@
 import { addGlobalContext, getData, privateOptions } from '../src/collect';
-import { safeGet } from '../src/utils';
 // @ts-ignore
 global.getApp = () => {
   return {

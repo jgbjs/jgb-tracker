@@ -39,7 +39,6 @@ export type IDataProcessor = (
   ctx: any
 ) => [boolean, any] | undefined;
 
-const getDataProcessors = [] as IDataProcessor[];
 const notifyPool = [] as INotify[];
 
 export class Collector {
@@ -56,12 +55,17 @@ export class Collector {
   }
 
   registerMethodWithMap(map: IMapFunction, m: IConfigMethod) {
-    const { method, data, eventName } = m;
+    const { method, data, condition } = m;
     if (map.has(method)) {
       return;
     }
     const fn = throttle(
       (ctx: any, ...args: any[]) => {
+        // 同步逻辑判断 是否满足条件
+        if (condition && !this.getData(condition, args, ctx)) {
+          return;
+        }
+
         const reportData: any = Object.create(null);
         const keys = Object.keys(data);
         for (const key of keys) {

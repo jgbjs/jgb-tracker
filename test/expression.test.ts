@@ -1,4 +1,4 @@
-import { runInConext, Context } from '../src/expression';
+import { Context, runInConext } from '../src/expression';
 
 describe('expression', () => {
   it('number + number', () => {
