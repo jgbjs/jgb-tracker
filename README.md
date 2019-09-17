@@ -12,14 +12,15 @@
 
 ### 内置通用数据定义
 
-| 名称        | 描述                      |      |
-| ----------- | ------------------------- | ---- |
-| \$APP       | getApp()的数据            |      |
-| \$DATASET   | 事件的 *dataset*          |      |
-| \$EVENT     | 事件的 *event*            |      |
-| \$OPTIONS   | 当前页面的 *options*      |      |
-| $DATA       | 当前页面或者组件的 *data* |      |
-| $APPOPTIONS | App.onLaunch的options     |      |
+| 名称        | 描述                                   |      |
+| ----------- | -------------------------------------- | ---- |
+| \$APP       | getApp()的数据                         |      |
+| \$DATASET   | 事件的 *dataset*                       |      |
+| \$EVENT     | 事件的 *event*，即method的arguments[0] |      |
+| \$OPTIONS   | 当前页面的 *options*                   |      |
+| $DATA       | 当前页面或者组件的 *data*              |      |
+| $APPOPTIONS | App.onLaunch的options                  |      |
+| $ARGS       | method的arguments                      |      |
 
 
 

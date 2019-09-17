@@ -197,7 +197,11 @@ export function getData(path: string, args: any[], ctx: any = {}) {
     // app onLaunch options
     $APPOPTIONS: app && app[privateAppOptions],
     // 获取data上数据
-    $DATA: ctx && ctx.data
+    $DATA: ctx && ctx.data,
+    // method的 arguments
+    $ARGS: args,
+    // component or page
+    $THIS: ctx
   });
 
   try {

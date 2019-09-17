@@ -76,6 +76,16 @@ describe('$OPTIONS', () => {
   });
 });
 
+describe('$ARGS', () => {
+  const result = getData('$ARGS[0].type', [event], pageCtx);
+  expect(result).toBe('tap');
+});
+
+describe('$THIS', () => {
+  const result = getData('$THIS.data.api', [event], pageCtx);
+  expect(result).toBe('myapi');
+});
+
 describe('custom getDataProcessor', () => {
   addGlobalContext(() => ({
     $TEST: {
