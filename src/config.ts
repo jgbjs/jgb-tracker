@@ -177,10 +177,7 @@ export class TrackerConfig {
     const method = m.method;
     const oldMethod = ctx[method];
 
-    const isRegisterMethod = !!collector.getMethod(route, method);
-    if (!isRegisterMethod) {
-      collector.registerMethod(route, m);
-    }
+    collector.registerMethod(route, m);
 
     const fn = function(this: any, ...args: any[]) {
       if (typeof oldMethod === 'function') {

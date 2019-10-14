@@ -5,7 +5,7 @@ import { runInConext } from './expression/index';
 import { getCurrentPage, hasCode, safeGet } from './utils';
 
 // tslint:disable-next-line: ban-types
-export type IMapFunction = Map<string, Function>;
+export type IMapFunction = Map<string, Map<object, Function>>;
 
 export interface ICollectData {
   eventName: string;
@@ -54,10 +54,20 @@ export class Collector {
     this.collect.delete(path);
   }
 
-  registerMethodWithMap(map: IMapFunction, m: IConfigMethod) {
+  /**
+   * @returns 返回是否已经注册
+   */
+  registerMethodWithMap(map: IMapFunction, m: IConfigMethod): boolean {
     const { method, data, condition } = m;
-    if (map.has(method)) {
-      return;
+    let mapFuns = map.get(method);
+    // 当已经注册过方法
+    if (mapFuns && mapFuns.has(m)) {
+      return true;
+    }
+    // 没有注册时，先初始化数据
+    if (!mapFuns) {
+      mapFuns = new Map();
+      map.set(method, mapFuns);
     }
     const fn = throttle(
       (ctx: any, ...args: any[]) => {
@@ -85,13 +95,15 @@ export class Collector {
       }
     );
     // 默认 50ms 触发一次
-    map.set(method, fn);
+    mapFuns.set(m, fn);
+    return false;
   }
   /**
    * 注册方法
    * @param path
    * @param method
    * @param data
+   * @returns boolean 返回是否已经注册
    */
   registerMethod(path: string, m: IConfigMethod) {
     let map = this.collect.get(path);
@@ -99,7 +111,7 @@ export class Collector {
       map = new Map();
       this.collect.set(path, map);
     }
-    this.registerMethodWithMap(map, m);
+    return this.registerMethodWithMap(map, m);
   }
 
   /**
@@ -123,12 +135,13 @@ export class Collector {
    * @param args
    */
   invokeMethod(path: string, method: string, args: any[]) {
-    const fn = this.getMethod(path, method);
-    if (!fn) {
+    const mapFunc = this.getMethod(path, method);
+    if (!mapFunc) {
       return;
     }
-    // console.log('fn', fn);
-    fn.apply(null, args);
+    for (const [, fn] of mapFunc) {
+      fn.apply(null, args);
+    }
   }
 
   notify(collectData: ICollectData) {
