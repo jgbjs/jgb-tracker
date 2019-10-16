@@ -102,8 +102,8 @@ export class TrackerConfig {
 
       const localCacheTask = async () => {
         const cache = await cacheManage.getCache();
-        if (cache && cache.data) {
-          this.config = cache.data as IConfig;
+        if (cache) {
+          this.config = cache as IConfig;
         }
       };
 

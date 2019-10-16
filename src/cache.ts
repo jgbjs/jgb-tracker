@@ -11,9 +11,12 @@ export class CacheManage {
   }
 
   getCache() {
-    return jgb.getStorage({
-      key: this.cacheKey
-    }).catch();
+    return jgb
+      .getStorage({
+        key: this.cacheKey
+      })
+      .then(res => res.data)
+      .catch(() => '');
   }
 }
 
