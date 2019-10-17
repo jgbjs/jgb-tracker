@@ -285,10 +285,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
-"@tuhu/miniprogram-api-typings@^2.6.5-2":
-  version "2.6.5-2"
-  resolved "https://registry.npmjs.org/@tuhu/miniprogram-api-typings/-/miniprogram-api-typings-2.6.5-2.tgz#1739d2f91124a5ce26d597fad99b5c0d7aab9180"
-  integrity sha512-BEBIcGgr8Hqf23vRlO0Fnm6m3MN2PFuJT4aLTTPS/wjgd/rSkozMRDn9uyRSKf7tT2A3RAMD065S/AMO7dGVFw==
+"@tuhu/miniprogram-api-typings@^2.8.3-2":
+  version "2.8.3-2"
+  resolved "https://registry.npmjs.org/@tuhu/miniprogram-api-typings/-/miniprogram-api-typings-2.8.3-2.tgz#a3b905508f4d801c91e5ad4b208a286dc2ecf317"
+  integrity sha512-2oVLpT+sth5tu6dpGjqDSycpOjfuu59c6iSXXo0BzuLof8wiIbZ8FdaqZcCLafM38bM3y2YeakiOk/dbxSzl6w==
 
 "@types/babel__core@^7.1.0":
   version "7.1.2"
@@ -2067,14 +2067,14 @@ jest@^24.8.0:
     import-local "^2.0.0"
     jest-cli "^24.8.0"
 
-jgb-weapp@^1.5.7:
-  version "1.5.7"
-  resolved "https://registry.npm.taobao.org/jgb-weapp/download/jgb-weapp-1.5.7.tgz#38a42c60dfeee6d1ab9d492797f541e713b8863e"
-  integrity sha1-OKQsYN/u5tGrnUknl/VB5xO4hj4=
+jgb-weapp@^1.5.13:
+  version "1.5.13"
+  resolved "https://registry.npm.taobao.org/jgb-weapp/download/jgb-weapp-1.5.13.tgz?cache=0&sync_timestamp=1571303632584&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fjgb-weapp%2Fdownload%2Fjgb-weapp-1.5.13.tgz#fe6392461ce7cbaa14a160830ece1734878f0ef0"
+  integrity sha1-/mOSRhzny6oUoWCDDs4XNIePDvA=
   dependencies:
-    "@tuhu/miniprogram-api-typings" "^2.6.5-2"
-    lodash "^4.17.10"
-    tslib "^1.9.3"
+    "@tuhu/miniprogram-api-typings" "^2.8.3-2"
+    lodash "^4.17.13"
+    tslib "^1.10.0"
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
@@ -2250,10 +2250,15 @@ lodash.sortby@^4.7.0:
   resolved "https://registry.npm.taobao.org/lodash.sortby/download/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
   integrity sha1-7dFMgk4sycHgsKG0K7UhBRakJDg=
 
-lodash@^4.17.10, lodash@^4.17.11:
+lodash@^4.17.11:
   version "4.17.11"
   resolved "http://registry.npm.taobao.org/lodash/download/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha1-s56mIp72B+zYniyN8SU2iRysm40=
+
+lodash@^4.17.13:
+  version "4.17.15"
+  resolved "https://registry.npm.taobao.org/lodash/download/lodash-4.17.15.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Flodash%2Fdownload%2Flodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
+  integrity sha1-tEf2ZwoEVbv+7dETku/zMOoJdUg=
 
 loose-envify@^1.0.0:
   version "1.4.0"
@@ -3476,7 +3481,12 @@ ts-jest@^24.0.2:
     semver "^5.5"
     yargs-parser "10.x"
 
-tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.3:
+tslib@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.npm.taobao.org/tslib/download/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
+  integrity sha1-w8GflZc/sKYpc/sJ2Q2WHuQ+XIo=
+
+tslib@^1.8.0, tslib@^1.8.1:
   version "1.9.3"
   resolved "http://registry.npm.taobao.org/tslib/download/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
   integrity sha1-1+TdeSRdhUKMTX5IIqeZF5VMooY=
