@@ -61,9 +61,9 @@ export default {
       if (pages.length === 0) {
         return;
       }
-      pages.forEach(page => config.injectPage(page));
+      pages.forEach((page) => config.injectPage(page));
 
-      components.forEach(component => config.injectComponent(component));
+      components.forEach((component) => config.injectComponent(component));
     });
 
     return this;
