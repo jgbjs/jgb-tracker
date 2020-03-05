@@ -30,6 +30,10 @@ export interface IConfigMethod {
    */
   method: string;
   /**
+   * 条件判断
+   */
+  condition?: string;
+  /**
    * 需要采集的数据
    */
   data: {
@@ -98,12 +102,12 @@ export class TrackerConfig {
 
       const localCacheTask = async () => {
         const cache = await cacheManage.getCache();
-        if (cache && cache.data) {
-          this.config = cache.data as IConfig;
+        if (cache) {
+          this.config = cache;
         }
       };
 
-      const rq = requestTask();
+      const rq = requestTask().catch();
       await Promise.all([rq, localCacheTask()]);
     } else {
       this.config = urlorConfig;
@@ -173,10 +177,7 @@ export class TrackerConfig {
     const method = m.method;
     const oldMethod = ctx[method];
 
-    const isRegisterMethod = !!collector.getMethod(route, method);
-    if (!isRegisterMethod) {
-      collector.registerMethod(route, m);
-    }
+    collector.registerMethod(route, m);
 
     const fn = function(this: any, ...args: any[]) {
       if (typeof oldMethod === 'function') {

@@ -1,6 +1,6 @@
 {
   "name": "@jgbjs/tracker",
-  "version": "1.1.2",
+  "version": "1.1.5",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": "git@github.com:jgbjs/jgb-tracker.git",
@@ -24,9 +24,9 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "jgb-weapp": "^1.5.7",
+    "jgb-weapp": "^1.5.13",
     "lodash": "^4.17.11",
-    "tslib": "^1.9.3"
+    "tslib": "^1.10.0"
   },
   "jest": {
     "preset": "ts-jest"

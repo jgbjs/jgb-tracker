@@ -9,17 +9,19 @@
 - 内置通用数据 `$APP`、 `$DATA`、`$DATASET`、 `$EVENT`、 `$OPTIONS`等
 - 支持自定义数据
 - 支持数据表达式
+- 支持condition
 
 ### 内置通用数据定义
 
-| 名称        | 描述                      |      |
-| ----------- | ------------------------- | ---- |
-| \$APP       | getApp()的数据            |      |
-| \$DATASET   | 事件的 *dataset*          |      |
-| \$EVENT     | 事件的 *event*            |      |
-| \$OPTIONS   | 当前页面的 *options*      |      |
-| $DATA       | 当前页面或者组件的 *data* |      |
-| $APPOPTIONS | App.onLaunch的options     |      |
+| 名称        | 描述                                   |      |
+| ----------- | -------------------------------------- | ---- |
+| \$APP       | getApp()的数据                         |      |
+| \$DATASET   | 事件的 *dataset*                       |      |
+| \$EVENT     | 事件的 *event*，即method的arguments[0] |      |
+| \$OPTIONS   | 当前页面的 *options*                   |      |
+| $DATA       | 当前页面或者组件的 *data*              |      |
+| $APPOPTIONS | App.onLaunch的options                  |      |
+| $ARGS       | method的arguments                      |      |
 
 
 
@@ -144,6 +146,8 @@ const json = {
           method: 'onTap',
           // 采集上报的事件名
           eventName: 'tapxxx',
+          // 支持条件表达式，只有当 Boolean(返回值) 为true时才会触发埋点
+          condition: '$DATA.clickTime > 2',
           // 需要采集的数据
           data: {
             dataname: '$EVENT.type'

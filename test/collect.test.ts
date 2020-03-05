@@ -1,5 +1,4 @@
 import { addGlobalContext, getData, privateOptions } from '../src/collect';
-import { safeGet } from '../src/utils';
 // @ts-ignore
 global.getApp = () => {
   return {
@@ -74,6 +73,16 @@ describe('$OPTIONS', () => {
     const result = getData('$OPTIONS.url', [event], pageCtx);
     expect(result).toBe('url');
   });
+});
+
+describe('$ARGS', () => {
+  const result = getData('$ARGS[0].type', [event], pageCtx);
+  expect(result).toBe('tap');
+});
+
+describe('$THIS', () => {
+  const result = getData('$THIS.data.api', [event], pageCtx);
+  expect(result).toBe('myapi');
 });
 
 describe('custom getDataProcessor', () => {

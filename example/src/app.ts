@@ -5,8 +5,7 @@ import { JApp } from 'jgb-weapp';
 wx.Tracker = Tracker;
 
 Tracker.init({
-  configUrl: 'https://img1.tuhu.org/mp/FpWaDvNhHCt4tZCznH3gSCOdz-6T.json'
-  // configUrl: 'https://img1.tuhu.org/mp/FlT0NXc5Ek2HjehV1gEmYehNlL6L.json',
+  configUrl: 'https://img1.tuhu.org/mp/FrMoqrcm9LEASKORGzsMwb8UGEKp.json'
   // localConfig: {
   //   tracks: [
   //     {

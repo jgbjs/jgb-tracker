@@ -4,3 +4,4 @@
 <button bind:tap="onGetUser">get user data [custom]</button>
 <inner></inner>
 <button bind:tap="onToIndex">to index</button>
+<button bind:tap="onClickAdd">onClickAdd</button>
