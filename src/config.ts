@@ -86,32 +86,34 @@ export class TrackerConfig {
   private config?: IConfig;
   private loadPromise: Promise<any> | undefined;
   private async innerLoad(urlorConfig: any) {
-    if (typeof urlorConfig === 'string') {
-      const url = urlorConfig;
-      const requestTask = async () => {
-        const result = await jgb.request({
-          url,
-          // tslint:disable-next-line: object-literal-sort-keys
-          priority: 0
-        });
-
-        const c = result.data;
-        this.config = await this.process(c);
-        cacheManage.setCache(this.config);
-      };
-
-      const localCacheTask = async () => {
-        const cache = await cacheManage.getCache();
-        if (cache) {
-          this.config = cache;
-        }
-      };
-
-      const rq = requestTask().catch();
-      await Promise.all([rq, localCacheTask()]);
-    } else {
+    // localConfig
+    if (typeof urlorConfig === 'object') {
       this.config = urlorConfig;
+      return;
     }
+
+    // url
+    const url = urlorConfig;
+    const requestTask = async () => {
+      const result = await jgb.request({
+        url,
+        priority: 0
+      });
+
+      const c = result.data;
+      this.config = await this.process(c);
+      cacheManage.setCache(this.config);
+    };
+
+    const localCacheTask = async () => {
+      const cache = await cacheManage.getCache();
+      if (cache) {
+        this.config = cache;
+      }
+    };
+
+    const rq = requestTask().catch();
+    await Promise.all([rq, localCacheTask()]);
   }
   /**
    * 加载配置

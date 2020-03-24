@@ -1,11 +1,11 @@
-import throttle from 'lodash/throttle';
-import { IConfigComponentItem, IConfigMethod, IConfigPageItem } from './config';
-import { Context } from './expression/context';
-import { runInConext } from './expression/index';
-import { getCurrentPage, hasCode, safeGet } from './utils';
+import throttle from "lodash/throttle";
+import { IConfigComponentItem, IConfigMethod, IConfigPageItem } from "./config";
+import { Context } from "./expression/context";
+import { runInConext } from "./expression/index";
+import { getCurrentPage, hasCode, safeGet } from "./utils";
 
 // tslint:disable-next-line: ban-types
-export type IMapFunction = Map<string, Map<object, Function>>;
+export type IMapFunction = Map<string, Map<IConfigMethod, Function>>;
 
 export interface ICollectData {
   eventName: string;
@@ -16,9 +16,9 @@ export interface ICollectData {
 export type INotify = (collect: ICollectData) => any;
 
 /** 私有page options，仅供jgb-tracker使用  */
-export const privateOptions: string = Symbol('options') as any;
+export const privateOptions: string = Symbol("options") as any;
 /** 私有app options，仅供jgb-tracker使用  */
-export const privateAppOptions: string = Symbol('appOptions') as any;
+export const privateAppOptions: string = Symbol("appOptions") as any;
 /**
  * 处理 getData
  */
@@ -177,10 +177,21 @@ const globalContextFns: any[] = [];
  * 添加全局预设值
  */
 export function addGlobalContext(fn: () => { [key: string]: any }) {
-  if (typeof fn !== 'function') {
+  if (typeof fn !== "function") {
     return;
   }
   globalContextFns.push(fn);
+}
+
+/**
+ * Plugin can't getApp()
+ */
+export function safeGetApp() {
+  try {
+    return getApp();
+  } catch (error) {
+    return {} as any;
+  }
 }
 
 /**
@@ -195,7 +206,7 @@ export function addGlobalContext(fn: () => { [key: string]: any }) {
 export function getData(path: string, args: any[], ctx: any = {}) {
   const event = args[0];
   const curPage = getCurrentPage() as any;
-  const app = getApp();
+  const app = safeGetApp();
   const globalContext = globalContextFns.reduce(
     (obj, fn) => Object.assign(obj, fn()),
     {}
@@ -205,7 +216,7 @@ export function getData(path: string, args: any[], ctx: any = {}) {
     // 获取app实例的数据
     $APP: app,
     // 获取wxml中data-*系列属性的值
-    $DATASET: safeGet(event, 'currentTarget.dataset'),
+    $DATASET: safeGet(event, "currentTarget.dataset"),
     // 事件
     $EVENT: event,
     // page options

@@ -1,25 +1,25 @@
 export const binary_ops = {
-  '||': 1,
-  '&&': 2,
-  '|': 3,
-  '^': 4,
-  '&': 5,
-  '==': 6,
-  '!=': 6,
-  '===': 6,
-  '!==': 6,
-  '<': 7,
-  '>': 7,
-  '<=': 7,
-  '>=': 7,
-  '<<': 8,
-  '>>': 8,
-  '>>>': 8,
-  '+': 9,
-  '-': 9,
-  '*': 10,
-  '/': 10,
-  '%': 10
+  "||": 1,
+  "&&": 2,
+  "|": 3,
+  "^": 4,
+  "&": 5,
+  "==": 6,
+  "!=": 6,
+  "===": 6,
+  "!==": 6,
+  "<": 7,
+  ">": 7,
+  "<=": 7,
+  ">=": 7,
+  "<<": 8,
+  ">>": 8,
+  ">>>": 8,
+  "+": 9,
+  "-": 9,
+  "*": 10,
+  "/": 10,
+  "%": 10
 };
 
 export type IBinaryOps = keyof typeof binary_ops;
@@ -66,16 +66,20 @@ export interface IArrayExpression extends IBase {
 
 export interface IUnaryExpression extends IBase {
   argument: IBase;
-  operator: '-' | '+' | '!' | '~' | 'void' | 'typeof' | 'delete';
+  operator: "-" | "+" | "!" | "~" | "void" | "typeof" | "delete";
 }
 
 export interface ILogicalExpression extends IBase {
   left: IBase;
   right: IBase;
-  operator: '||' | '&&';
+  operator: "||" | "&&";
 }
 
-export interface IConditionalExpression extends IBase {}
+export interface IConditionalExpression extends IBase {
+  test: IBase;
+  consequent: IBase;
+  alternate: IBase;
+}
 
 export interface IBinaryExpression extends IBase {
   operator: IBinaryOps;

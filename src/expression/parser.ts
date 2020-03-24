@@ -64,6 +64,7 @@ function getMaxKeyLen(obj: any) {
   let max_len = 0;
   let len;
   for (const key in obj) {
+    // tslint:disable-next-line: no-conditional-assignment
     if ((len = key.length) > max_len && obj.hasOwnProperty(key)) {
       max_len = len;
     }
@@ -140,6 +141,7 @@ export class Parser {
         this.index++; // ignore separators
       } else {
         // Try to gobble each expression individually
+        // tslint:disable-next-line: no-conditional-assignment
         if ((node = this.gobbleExpression())) {
           nodes.push(node);
           // If we weren't able to find a binary expression and are out of room, then

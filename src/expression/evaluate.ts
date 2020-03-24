@@ -53,8 +53,8 @@ const visitors: EvaluateMap = {
       // "**": (a, b) => {
       //   throw ErrImplement('**')
       // },
-      in: (a: string, b: any) => a in b,
-      instanceof: (a: any, b: any) => a instanceof b
+      'in': (a: string, b: any) => a in b,
+      'instanceof': (a: any, b: any) => a instanceof b
     };
     return expr[node.operator as any](
       evaluate(node.left, scope),
@@ -108,8 +108,8 @@ const visitors: EvaluateMap = {
       '!': () => !evaluate(node.argument, scope),
       // tslint:disable-next-line: no-bitwise
       '~': () => ~evaluate(node.argument, scope),
-      void: () => void evaluate(node.argument, scope),
-      typeof: () => {
+      "void": () => void evaluate(node.argument, scope),
+      "typeof": () => {
         if (node.argument.type === 'Identifier') {
           const $var = scope.hasBinding(THIS);
           return $var ? typeof $var.value : 'undefined';
@@ -117,7 +117,7 @@ const visitors: EvaluateMap = {
           return typeof evaluate(node.argument, scope);
         }
       },
-      delete: () => {
+      "delete": () => {
         // delete 是真麻烦
         if (node.argument.type === 'MemberExpression') {
           const { object, property, computed } = node.argument;
