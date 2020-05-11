@@ -7,9 +7,21 @@ import { getCurrentPage, hasCode, safeGet } from "./utils";
 // tslint:disable-next-line: ban-types
 export type IMapFunction = Map<string, Map<IConfigMethod, Function>>;
 
+type IReportType = "METHOD" | "EXPOSURE";
+
 export interface ICollectData {
+  /**
+   * 事件名称
+   */
   eventName: string;
+  /**
+   * 上报数据
+   */
   data: any;
+  /**
+   * 上报类型
+   */
+  type: IReportType;
   [key: string]: any;
 }
 
@@ -85,13 +97,14 @@ export class Collector {
 
         const collectData = {
           ...m,
-          data: reportData
+          data: reportData,
+          type: "METHOD" as IReportType
         };
         this.notify(collectData);
       },
       Collector.MS,
       {
-        trailing: false
+        trailing: false,
       }
     );
     // 默认 50ms 触发一次
@@ -229,7 +242,7 @@ export function getData(path: string, args: any[], ctx: any = {}) {
     // method的 arguments
     $ARGS: args,
     // component or page
-    $THIS: ctx
+    $THIS: ctx,
   });
 
   try {

@@ -1,10 +1,10 @@
-import { jgb } from 'jgb-weapp';
-import { cacheManage } from './cache';
-import { Collector, registerCollect } from './collect';
-import { getCurrentPage, normalizePath } from './utils';
+import { jgb, JComponent, JPage } from "jgb-weapp";
+import { cacheManage } from "./cache";
+import { Collector, registerCollect } from "./collect";
+import { getCurrentPage, normalizePath, hasCode } from "./utils";
 
 type IProcessFn = (config: any) => IConfig | Promise<IConfig>;
-const $TRACKER = Symbol('TRACKER');
+const $TRACKER = Symbol("TRACKER");
 let processFn: IProcessFn = (conf: any) => conf;
 
 export interface IConfigElement {
@@ -41,6 +41,35 @@ export interface IConfigMethod {
   };
 }
 
+/**
+ * 曝光
+ */
+export interface IExposureItem extends Omit<IConfigMethod, "method"> {
+  /** selector  */
+  className: string;
+  /**
+   * 元素与可视区相交比
+   * 取值：0~1
+   * @default 0.5
+   */
+  ratio?: number;
+  /**
+   * 最大相交区域高度/宽
+   * @default 100px
+   */
+  maxIntersection?: number;
+  /**
+   * 停留在可视区内时间
+   * @default 1000ms
+   */
+  stay?: number;
+  /**
+   * 是否只触发一次
+   * @default false
+   */
+  once?: boolean;
+}
+
 export interface IConfigPageItem {
   /**
    * 页面路径
@@ -58,6 +87,10 @@ export interface IConfigPageItem {
    * track的方法
    */
   methods?: IConfigMethod[];
+  /**
+   * track 曝光
+   */
+  exposure?: IExposureItem[];
 }
 
 export interface IConfigComponentItem {
@@ -73,6 +106,10 @@ export interface IConfigComponentItem {
    * track的方法
    */
   methods?: IConfigMethod[];
+  /**
+   * track 曝光
+   */
+  exposure?: IExposureItem[];
 }
 
 export interface IConfig {
@@ -82,12 +119,22 @@ export interface IConfig {
   tracks: Array<IConfigPageItem | IConfigComponentItem>;
 }
 
+interface ICacheData {
+  minHeight: number;
+  minWidth: number;
+  timeout: number;
+  inView?: boolean;
+}
+
+const OBSERVE_KEY = Symbol("observe");
+// const OBSERVE_QUEUE_DATA = Symbol("ob_queue_data");
+
 export class TrackerConfig {
   private config?: IConfig;
   private loadPromise: Promise<any> | undefined;
   private async innerLoad(urlorConfig: any) {
     // localConfig
-    if (typeof urlorConfig === 'object') {
+    if (typeof urlorConfig === "object") {
       this.config = urlorConfig;
       return;
     }
@@ -97,7 +144,7 @@ export class TrackerConfig {
     const requestTask = async () => {
       const result = await jgb.request({
         url,
-        priority: 0
+        priority: 0,
       });
 
       const c = result.data;
@@ -139,7 +186,9 @@ export class TrackerConfig {
    * 根据path获取对应配置
    * @param url
    */
-  async getConfig(url: string): Promise<IConfigPageItem | undefined> {
+  async getConfig(
+    url: string
+  ): Promise<IConfigPageItem | IConfigComponentItem | undefined> {
     if (this.loadPromise) {
       await this.loadPromise;
     }
@@ -147,6 +196,7 @@ export class TrackerConfig {
     if (!this.config || !this.config.tracks) {
       return;
     }
+
     const c = this.config;
     const { path } = normalizePath(url);
 
@@ -169,7 +219,12 @@ export class TrackerConfig {
     return false;
   }
 
-  injectMethods(ctx: any, methods: any[], collector: Collector, route: any) {
+  injectMethods(
+    ctx: any,
+    methods: IConfigMethod[],
+    collector: Collector,
+    route: any
+  ) {
     for (const m of methods) {
       this.injectMethod(ctx, m, collector, route);
     }
@@ -181,8 +236,8 @@ export class TrackerConfig {
 
     collector.registerMethod(route, m);
 
-    const fn = function(this: any, ...args: any[]) {
-      if (typeof oldMethod === 'function') {
+    const fn = function (this: any, ...args: any[]) {
+      if (typeof oldMethod === "function") {
         oldMethod.apply(this, args);
       }
 
@@ -193,30 +248,183 @@ export class TrackerConfig {
   }
 
   /**
-   * 给当前页面实例注入tracker
-   * @param ctx
-   * @param route
+   * 给页面或组件注入 监听曝光度事件
    */
-  async injectPage(ctx: any) {
+  injectIntersectionObserver(
+    ctx: any,
+    exposure: IExposureItem[] = [],
+    collector: Collector
+  ) {
+    if (exposure.length === 0) {
+      return;
+    }
+
+    this.destoryObserver(ctx);
+
+    // ctx[OBSERVE_QUEUE_DATA] = [];
+    // @ts-ignore
+    ctx[OBSERVE_KEY] = exposure
+      .map((item) => {
+        return this.createIntersectionObserver(ctx, item, (ob, e) => {
+          const once = item.once ?? false;
+          if (once) {
+            ob.disconnect();
+          }
+
+          const { data, eventName } = item;
+          const keys = Object.keys(data);
+          const reportData: any = Object.create(null);
+          for (const key of keys) {
+            const valuePath = data[key];
+            reportData[key] = collector.getData(valuePath, [e], ctx);
+          }
+
+          // ctx[OBSERVE_QUEUE_DATA].push(reportData);
+          collector.notify({
+            type: 'EXPOSURE',
+            eventName: eventName,
+            data: reportData,
+          });
+        });
+      })
+      .filter((ob) => ob);
+  }
+
+  private createIntersectionObserver(
+    ctx: JComponent,
+    e: IExposureItem,
+    notify: (ob: wxNS.IntersectionObserver, e?: Record<string, any>) => void
+  ) {
+    const { className } = e;
+    const ratio = Math.min(1, Math.max(0, e.ratio ?? 0.5));
+    if (ratio === 0) return;
+    const maxIntersection = e.maxIntersection ?? 100;
+    const stay = e.stay ?? 1000;
+    const ob = ctx.createIntersectionObserver({
+      thresholds: [0, ratio, 1],
+      observeAll: true,
+    });
+
+    const hasManyDomPromise = new Promise<boolean>((resolve) =>
+      ctx
+        .createSelectorQuery()
+        .selectAll(className)
+        .boundingClientRect((rects: any) => resolve(rects.length > 1))
+        .exec()
+    );
+
+    const cache = new Map<string, ICacheData>();
+
+    const getOrSet = (key: string, set: () => ICacheData) =>
+      cache.has(key) ? cache.get(key) : set();
+
+    ob.relativeToViewport().observe(className, async (res) => {
+      if (!res) return;
+      const hasManyDom = await hasManyDomPromise;
+      const { boundingClientRect, intersectionRect } = res;
+      const id: string = this.getHashId(res, hasManyDom);
+      if (!id) {
+        console.warn(
+          "[曝光配置]",
+          `当前选择器 [${className}] 查询到多个匹配元素，需要为每个元素设置id 或者 dataset`
+        );
+        return;
+      }
+
+      const result = getOrSet(id, () => {
+        const minHeight = Math.min(
+          maxIntersection,
+          boundingClientRect.height * ratio
+        );
+        const minWidth = Math.min(
+          maxIntersection,
+          boundingClientRect.width * ratio
+        );
+        return {
+          minHeight,
+          minWidth,
+          timeout: -1,
+        };
+      });
+      if (!result) return;
+      const { minWidth, minHeight } = result;
+
+      if (
+        res.intersectionRatio > 0 &&
+        (intersectionRect.height >= minHeight ||
+          intersectionRect.width >= minWidth)
+      ) {
+        if (result.inView) {
+          return;
+        }
+        // 满足计算等待时间
+        const timeout = setTimeout(() => {
+          notify(ob, res);
+        }, stay);
+        result.timeout = timeout;
+        result.inView = true;
+      } else {
+        clearTimeout(result.timeout);
+        result.inView = false;
+      }
+      cache.set(id, result);
+    });
+    return ob;
+  }
+
+  /**
+   * 根据 Observe 回调计算出 hashId
+   */
+  private getHashId(res: any, hasManyDom: boolean): string {
+    if (!hasManyDom) {
+      return "id";
+    }
+
+    if (res.id) {
+      return res.id;
+    }
+
+    if (res.dataset && Object.keys(res.dataset).length) {
+      return `${hasCode(JSON.stringify(res.dataset))}`;
+    }
+
+    return "";
+  }
+
+  /**
+   * 获取页面collect
+   * @param {Boolean} force
+   */
+  async getPageCollect(ctx: any, force = false) {
     const route = ctx.route || ctx.__route__;
     const c = await this.getConfig(route);
     if (!c) {
       return;
     }
 
-    const { hash, collector } = registerCollect(c);
-    if (this.isSameTracker(ctx, route, hash, collector)) {
+    const result = registerCollect(c);
+    const { hash, collector } = result;
+    if (!force && this.isSameTracker(ctx, route, hash, collector)) {
       return;
     }
-
-    this.injectMethods(ctx, c.methods || [], collector, route);
+    return { collector, route, config: c };
   }
 
   /**
-   * 给当前组件实例注入tracker
+   * 给当前页面实例注入tracker
    * @param ctx
+   * @param route
    */
-  async injectComponent(ctx: any) {
+  async injectPage(ctx: any) {
+    const result = await this.getPageCollect(ctx);
+    if (!result) return;
+
+    const { collector, route, config } = result;
+
+    this.injectMethods(ctx, config.methods || [], collector, route);
+  }
+
+  async getComponentCollector(ctx: any, force = false) {
     const instance = getCurrentPage() as any;
     if (!instance) {
       return;
@@ -228,13 +436,37 @@ export class TrackerConfig {
     let c = await this.getConfig(route);
 
     // 优先使用page中component的配置
-    if (c && Array.isArray(c.components)) {
+    if (c && Array.isArray((c as IConfigPageItem).components)) {
       const { hash, collector } = registerCollect(c);
-      if (this.isSameTracker(ctx, route, hash, collector)) {
+      if (!force && this.isSameTracker(ctx, route, hash, collector)) {
+        return;
+      }
+      return { config: c, route, is, collector, isPageComponent: true };
+    } else {
+      c = await this.getConfig(is);
+
+      if (!c) {
         return;
       }
 
-      for (const component of c.components) {
+      const { hash, collector } = registerCollect(c);
+      if (!force && this.isSameTracker(ctx, route, hash, collector)) {
+        return;
+      }
+      return { config: c, route, is, collector, isPageComponent: false };
+    }
+  }
+  /**
+   * 给当前组件实例注入tracker
+   * @param ctx
+   */
+  async injectComponent(ctx: any) {
+    const result = await this.getComponentCollector(ctx);
+    if (!result) return;
+    const { config, route, is, collector } = result;
+    if (result.isPageComponent) {
+      const components = (config as IConfigPageItem).components || [];
+      for (const component of components) {
         if (component.path === is) {
           (component.methods || []).forEach((m) => {
             const path = `${route}#${is}`;
@@ -243,19 +475,50 @@ export class TrackerConfig {
         }
       }
     } else {
-      c = await this.getConfig(is);
+      this.injectMethods(ctx, config.methods || [], collector, is);
+    }
+  }
 
-      if (!c) {
-        return;
+  /**
+   * 为当前页面、组件实例注册observer
+   * @param {Boolean} isPage ctx否是页面
+   */
+  async registerIntersectionObserver(ctx: any, isPage = true) {
+    if (isPage) {
+      const result = await this.getPageCollect(ctx, true);
+      if (!result) return;
+
+      const { collector, config } = result;
+      this.injectIntersectionObserver(ctx, config.exposure, collector);
+    } else {
+      const result = await this.getComponentCollector(ctx, true);
+      if (!result) return;
+      const { collector, config } = result;
+
+      this.injectIntersectionObserver(ctx, config.exposure, collector);
+    }
+  }
+
+  /**
+   * 销毁一些注入数据
+   */
+  destory(ctx: any) {
+    this.destoryObserver(ctx);
+  }
+
+  private destoryObserver(ctx: any) {
+    const intersectionObserver = ctx[
+      OBSERVE_KEY
+    ] as wxNS.IntersectionObserver[];
+    ctx[OBSERVE_KEY] = null;
+    // 清空Observer
+    if (intersectionObserver) {
+      let len = intersectionObserver.length;
+      while (len) {
+        intersectionObserver[len - 1]?.disconnect();
+        --len;
       }
-
-      const path = is;
-      const { hash, collector } = registerCollect(c as IConfigComponentItem);
-      if (this.isSameTracker(ctx, route, hash, collector)) {
-        return;
-      }
-
-      this.injectMethods(ctx, c.methods || [], collector, path);
+      intersectionObserver.length = 0;
     }
   }
 }

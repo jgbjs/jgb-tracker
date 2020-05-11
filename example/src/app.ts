@@ -1,89 +1,46 @@
-import Tracker, { safeGet } from '@jgbjs/tracker/index';
-import { JApp } from 'jgb-weapp';
+import Tracker, { safeGet } from "@jgbjs/tracker/index";
+import { JApp } from "jgb-weapp";
+import { IConfig } from "@jgbjs/tracker/config";
 
 // @ts-ignore
 wx.Tracker = Tracker;
 
+const localConfig: IConfig = {
+  tracks: [
+    {
+      path: "pages/index/index",
+      exposure: [
+        {
+          eventName: "exposure-test",
+          className: ".ex-view",
+          data: {
+            value: `$DATA.value`,
+            id: `$OPTIONS.id`,
+            idx: `$EVENT.dataset.idx`
+          },
+        },
+      ],
+    },
+  ],
+};
+
 Tracker.init({
-  configUrl: 'https://img1.tuhu.org/mp/FrMoqrcm9LEASKORGzsMwb8UGEKp.json'
-  // localConfig: {
-  //   tracks: [
-  //     {
-  //       path: 'pages/index/index',
-  //       components: [
-  //         {
-  //           path: 'components/inner/index',
-  //           methods: [
-  //             {
-  //               method: 'onTap',
-  //               eventName: 'onTap',
-  //               data: {
-  //                 data: 'inner'
-  //               }
-  //             }
-  //           ]
-  //         }
-  //       ],
-  //       methods: [
-  //         {
-  //           method: 'onGetEvent',
-  //           eventName: 'onGetEvent',
-  //           data: {
-  //             event: '$EVENT.detail'
-  //           }
-  //         },
-  //         {
-  //           eventName: 'onGetDataset',
-  //           method: 'onGetDataset',
-  //           data: {
-  //             dataset: '$DATASET.test'
-  //           }
-  //         },
-  //         {
-  //           eventName: 'onGetApp',
-  //           method: 'onGetApp',
-  //           data: {
-  //             global: '$APP.global.data'
-  //           }
-  //         },
-  //         {
-  //           eventName: 'onGetUser',
-  //           method: 'onGetUser',
-  //           data: {
-  //             userId: '$USER.userId',
-  //             detail: '$EVENT.detail'
-  //           }
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       path: 'components/inner/index',
-  //       methods: [
-  //         {
-  //           eventName: 'onTap2',
-  //           data: {
-  //             inner: 'inner'
-  //           },
-  //           method: 'onTap'
-  //         }
-  //       ]
-  //     }
-  //   ]
-  // }
+  localConfig: localConfig,
+  // configUrl: "https://img1.tuhu.org/mp/FrMoqrcm9LEASKORGzsMwb8UGEKp.json",
 });
-Tracker.addNotify(data => {
-  console.log(data);
+Tracker.addNotify((data) => {
+  console.log("addNotify", data);
 });
 
 Tracker.addGlobalContext(() => ({
   $USER: {
-    userId: 'xxxx.xxxx'
-  }
+    userId: "xxxx.xxxx",
+  },
 }));
 
 JApp({
   global: {
-    data: 'test'
+    data: "test",
   },
-  onLaunch() {}
+  onLaunch() {},
 });

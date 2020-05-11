@@ -9,7 +9,8 @@
 - 内置通用数据 `$APP`、 `$DATA`、`$DATASET`、 `$EVENT`、 `$OPTIONS`等
 - 支持自定义数据
 - 支持数据表达式
-- 支持condition
+- 支持条件筛选
+- 支持曝光度
 
 ### 内置通用数据定义
 
@@ -139,6 +140,20 @@ const json = {
     {
       // 页面路径
       path: 'pages/xx/xx',
+      // 曝光度配置
+      exposure: [
+        {
+          // 需要监听的元素class, 其他参数和method保持一致
+          className: ".exposure-view",
+          // 采集上报的事件名
+          eventName: "exposure-xxx",        
+          // 需要采集的数据
+          data: {
+            value: `$DATA.value`,
+            idx: `$EVENT.dataset.idx`
+          },
+        },
+      ],
       // 需要采集的方法
       methods: [
         {
@@ -191,6 +206,48 @@ const json = {
   ]
 };
 ```
+
+
+
+### 曝光度
+
+`v1.2.0`起支持
+
+使用 `createIntersectionObserver` 作为元素记录曝光度的技术方案。
+
+#### 定义
+
+如何定义曝光度？
+
+目前使用方案：
+
+* 监听元素与可视区域的相交比> `0.5` 或者 满足相交区域的宽高大于`100px`
+* 符合上述条件，且停留时长 `1s` 就算曝光一次
+
+#### 注意
+
+当异步渲染数据时，我们需要补偿查询（因为仅在页面组件初次渲染时调用 `createIntersectionObserver` 查询节点, 此时是没有节点!!!）, 所以需要在适当的时候使用 `this.$registerObserver` 补偿查询。
+
+> 目前没有找到比较好的方案，去监听节点变更，作补偿查询。
+
+```ts
+import { JComponent , jgb } from 'jgb-weapp'
+
+JComponent({
+  method: {
+    getData() {
+      jgb.request({
+        url: `xxxx`
+      }).then(res => {
+        // setData
+        this.$registerObserver()
+      })
+    }
+  }
+})
+```
+
+
 
 ### 表达式
 

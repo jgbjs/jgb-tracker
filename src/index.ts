@@ -1,12 +1,12 @@
-import { JApp, JComponent, JPage } from 'jgb-weapp';
+import { JApp, JComponent, JPage } from "jgb-weapp";
 import {
   addGlobalContext,
   addNotify,
   privateAppOptions,
-  privateOptions
-} from './collect';
-import { addProcessConfigFn, config, IConfig } from './config';
-import { safeGet } from './utils';
+  privateOptions,
+} from "./collect";
+import { addProcessConfigFn, config, IConfig } from "./config";
+import { safeGet } from "./utils";
 
 export default {
   /** 加载配置  */
@@ -29,14 +29,23 @@ export default {
     JApp.mixin({
       onLaunch(options: any) {
         this[privateAppOptions] = options;
-      }
+      },
     });
 
     JPage.mixin({
       onLoad(options: any) {
         this[privateOptions] = options;
         config.injectPage(this);
-      }
+      },
+      onReady() {
+        this.$registerObserver();
+      },
+      onUnload() {
+        config.destory(this);
+      },
+      $registerObserver() {
+        config.registerIntersectionObserver(this);
+      },
     });
 
     JComponent.mixin({
@@ -47,11 +56,20 @@ export default {
 
         config.injectComponent(this);
       },
+      ready() {
+        this.$registerObserver();
+      },
       detached() {
         if (!HAS_LOAD_CONFIG) {
           components.delete(this);
         }
-      }
+        config.destory(this);
+      },
+      methods: {
+        $registerObserver() {
+          config.registerIntersectionObserver(this, false);
+        },
+      },
     });
 
     // 补全缺失的埋点
@@ -61,16 +79,22 @@ export default {
       if (pages.length === 0) {
         return;
       }
-      pages.forEach((page) => config.injectPage(page));
+      pages.forEach((page) => {
+        config.injectPage(page);
+        config.registerIntersectionObserver(page);
+      });
 
-      components.forEach((component) => config.injectComponent(component));
+      components.forEach((component) => {
+        config.injectComponent(component);
+        config.registerIntersectionObserver(component);
+      });
     });
 
     return this;
   },
   addGlobalContext,
   addNotify,
-  addProcessConfigFn
+  addProcessConfigFn,
 };
 
 export { safeGet };

@@ -5,3 +5,9 @@
 <inner></inner>
 <button bind:tap="onToIndex">to index</button>
 <button bind:tap="onClickAdd">onClickAdd</button>
+
+<block wx:for="{{arr}}">
+  <view class="ex-view" data-idx="{{item.idx}}" style="height: {{item.height}}rpx;">
+    ex-view {{item.height}}
+  </view>
+</block>
