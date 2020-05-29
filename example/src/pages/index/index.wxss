@@ -1,0 +1,4 @@
+.ex-view {
+  background-color: #0f0;
+  margin: 10px;
+}
