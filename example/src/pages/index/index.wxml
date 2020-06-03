@@ -8,6 +8,6 @@
 
 <block wx:for="{{arr}}">
   <view class="ex-view" data-idx="{{item.idx}}" style="height: {{item.height}}rpx;">
-    ex-view {{item.height}}
+    {{item.idx}}: {{item.height}}
   </view>
 </block>

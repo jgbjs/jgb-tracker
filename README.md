@@ -215,6 +215,28 @@ const json = {
 
 使用 `createIntersectionObserver` 作为元素记录曝光度的技术方案。
 
+#### 参数
+
+* className
+
+元素选择器
+
+* eventName
+
+上报事件名称
+
+* data
+
+配置上报数据
+
+* requestUrl (v1.2.1起)
+
+由于大部分场景都是请求接口数据，再监听节点`createIntersectionObserver` 。所以提供这个配置，当请求的成功时，请求的`url`会和 `requestUrl`匹配, 如果匹配则重新监听节点。例：
+
+> requestUrl: /api/v1
+>
+> url: https://xxxx/api/v1/xxx
+
 #### 定义
 
 如何定义曝光度？
