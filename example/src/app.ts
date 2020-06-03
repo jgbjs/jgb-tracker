@@ -13,6 +13,7 @@ const localConfig: IConfig = {
         {
           eventName: "exposure-test",
           className: ".ex-view",
+          requestUrl: `FrMoqrcm9LEASKORGzsMwb8UGEKp`,
           data: {
             value: `$DATA.value`,
             id: `$OPTIONS.id`,

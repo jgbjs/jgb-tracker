@@ -1,4 +1,4 @@
-import { JApp, JComponent, JPage } from "jgb-weapp";
+import { JApp, JComponent, JPage, jgb } from "jgb-weapp";
 import {
   addGlobalContext,
   addNotify,
@@ -26,6 +26,11 @@ export default {
     // 未加载config之前已经attached的component
     const components = new Set();
 
+    jgb.intercept("request", "success", (_, __, opts) => {
+      const url: string = opts.url;
+      config.notifyRequest(url);
+    });
+
     JApp.mixin({
       onLaunch(options: any) {
         this[privateAppOptions] = options;
@@ -43,7 +48,7 @@ export default {
       onUnload() {
         config.destory(this);
       },
-      $registerObserver() {
+      async $registerObserver() {
         config.registerIntersectionObserver(this);
       },
     });
@@ -67,7 +72,7 @@ export default {
       },
       methods: {
         $registerObserver() {
-          config.registerIntersectionObserver(this, false);
+          return config.registerIntersectionObserver(this, false);
         },
       },
     });

@@ -1,19 +1,19 @@
-import get from 'lodash/get';
+import get from "lodash/get";
 
 export function normalizePath(url: string) {
-  let [path, query = ''] = url.split('?');
-  if (path.startsWith('/')) {
+  let [path, query = ""] = url.split("?");
+  if (path.startsWith("/")) {
     path = path.slice(1);
   }
 
   return { path, query: normalizeQuery(query) };
 }
 
-export function normalizeQuery(query: string = '') {
-  query.split('&').reduce((obj: any, sp) => {
-    const [key, value] = sp.split('=');
+export function normalizeQuery(query: string = "") {
+  query.split("&").reduce((obj: any, sp) => {
+    const [key, value] = sp.split("=");
     return Object.assign(obj, {
-      [key]: value
+      [key]: value,
     });
   }, {});
 }
@@ -61,4 +61,15 @@ export function nextTick(cb: any) {
     return wx.nextTick(cb);
   }
   p.then(cb);
+}
+
+export function matchUrl(url: string, regex: string | RegExp) {
+  if (typeof regex === "string") {
+    return url.includes(regex);
+  }
+  return regex.test(url);
+}
+
+export function sleep(ms = 100) {
+  return new Promise((r) => setTimeout(r, ms));
 }

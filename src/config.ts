@@ -1,7 +1,13 @@
 import { jgb, JComponent, JPage } from "jgb-weapp";
 import { cacheManage } from "./cache";
 import { Collector, registerCollect } from "./collect";
-import { getCurrentPage, normalizePath, hasCode } from "./utils";
+import {
+  getCurrentPage,
+  normalizePath,
+  hasCode,
+  matchUrl,
+  sleep,
+} from "./utils";
 
 type IProcessFn = (config: any) => IConfig | Promise<IConfig>;
 const $TRACKER = Symbol("TRACKER");
@@ -47,6 +53,8 @@ export interface IConfigMethod {
 export interface IExposureItem extends Omit<IConfigMethod, "method"> {
   /** selector  */
   className: string;
+  /** 需要监听的url */
+  requestUrl?: string;
   /**
    * 元素与可视区相交比
    * 取值：0~1
@@ -132,6 +140,8 @@ const OBSERVE_KEY = Symbol("observe");
 export class TrackerConfig {
   private config?: IConfig;
   private loadPromise: Promise<any> | undefined;
+  private ctxMap = new Map<any, string[]>();
+
   private async innerLoad(urlorConfig: any) {
     // localConfig
     if (typeof urlorConfig === "object") {
@@ -281,7 +291,7 @@ export class TrackerConfig {
 
           // ctx[OBSERVE_QUEUE_DATA].push(reportData);
           collector.notify({
-            type: 'EXPOSURE',
+            type: "EXPOSURE",
             eventName: eventName,
             data: reportData,
           });
@@ -305,13 +315,15 @@ export class TrackerConfig {
       observeAll: true,
     });
 
-    const hasManyDomPromise = new Promise<boolean>((resolve) =>
+    const elementsLenPromise = new Promise<number>((resolve) =>
       ctx
         .createSelectorQuery()
         .selectAll(className)
-        .boundingClientRect((rects: any) => resolve(rects.length > 1))
+        .boundingClientRect((rects: any) => resolve(rects.length))
         .exec()
     );
+
+    const hasManyDomPromise = elementsLenPromise.then((len) => len > 1);
 
     const cache = new Map<string, ICacheData>();
 
@@ -490,12 +502,35 @@ export class TrackerConfig {
 
       const { collector, config } = result;
       this.injectIntersectionObserver(ctx, config.exposure, collector);
+      this.waitForRequest(ctx, config);
     } else {
       const result = await this.getComponentCollector(ctx, true);
       if (!result) return;
       const { collector, config } = result;
 
       this.injectIntersectionObserver(ctx, config.exposure, collector);
+      this.waitForRequest(ctx, config);
+    }
+  }
+
+  async notifyRequest(url: string) {
+    if (this.ctxMap.size === 0) return;
+    await sleep(100);
+    for (const [ctx, requestUrl] of this.ctxMap) {
+      const isMatch = await requestUrl.some((rurl) => matchUrl(url, rurl));
+      if (isMatch) {
+        ctx?.$registerObserver();
+      }
+    }
+  }
+
+  private waitForRequest(ctx: any, config?: IConfigComponentItem) {
+    if (!config?.exposure) return;
+    const requestUrl = config.exposure
+      .filter((item) => item.requestUrl)
+      .map((item) => item.requestUrl || "");
+    if (requestUrl.length) {
+      this.ctxMap.set(ctx, requestUrl);
     }
   }
 
@@ -504,6 +539,7 @@ export class TrackerConfig {
    */
   destory(ctx: any) {
     this.destoryObserver(ctx);
+    this.destoryNotify(ctx);
   }
 
   private destoryObserver(ctx: any) {
@@ -520,6 +556,10 @@ export class TrackerConfig {
       }
       intersectionObserver.length = 0;
     }
+  }
+
+  private destoryNotify(ctx: any) {
+    this.ctxMap.delete(ctx);
   }
 }
 
