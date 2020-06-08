@@ -407,7 +407,9 @@ export class TrackerConfig {
    * 获取页面collect
    * @param {Boolean} force
    */
-  async getPageCollect(ctx: any, force = false) {
+  async getPageCollect(ctx?: JPage, force = false) {
+    if (!ctx) return;
+
     const route = ctx.route || ctx.__route__;
     const c = await this.getConfig(route);
     if (!c) {
