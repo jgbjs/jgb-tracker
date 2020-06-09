@@ -41,4 +41,7 @@ JPage({
       },
     });
   },
+  onTabItemTap() {
+    
+  }
 });

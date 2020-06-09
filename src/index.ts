@@ -8,6 +8,37 @@ import {
 import { addProcessConfigFn, config, IConfig } from "./config";
 import { safeGet } from "./utils";
 
+function init() {
+  jgb.intercept("request", "success", (_, __, opts) => {
+    const url: string = opts.url;
+    config.notifyRequest(url);
+  });
+
+  JApp.mixin({
+    onLaunch(options: any) {
+      this[privateAppOptions] = options;
+    },
+  });
+
+  JPage.mixin({
+    onLoad(options: any) {
+      this[privateOptions] = options;
+      config.injectPage(this);
+    },
+    onReady() {
+      this.$registerObserver();
+    },
+    onUnload() {
+      config.destory(this);
+    },
+    async $registerObserver() {
+      config.registerIntersectionObserver(this);
+    },
+  });
+}
+
+init()
+
 export default {
   /** 加载配置  */
   loadConfig(opts: { configUrl?: string; localConfig?: IConfig }) {
@@ -25,33 +56,6 @@ export default {
     let HAS_LOAD_CONFIG = false;
     // 未加载config之前已经attached的component
     const components = new Set();
-
-    jgb.intercept("request", "success", (_, __, opts) => {
-      const url: string = opts.url;
-      config.notifyRequest(url);
-    });
-
-    JApp.mixin({
-      onLaunch(options: any) {
-        this[privateAppOptions] = options;
-      },
-    });
-
-    JPage.mixin({
-      onLoad(options: any) {
-        this[privateOptions] = options;
-        config.injectPage(this);
-      },
-      onReady() {
-        this.$registerObserver();
-      },
-      onUnload() {
-        config.destory(this);
-      },
-      async $registerObserver() {
-        config.registerIntersectionObserver(this);
-      },
-    });
 
     JComponent.mixin({
       attached() {

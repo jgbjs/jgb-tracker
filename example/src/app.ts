@@ -17,7 +17,30 @@ const localConfig: IConfig = {
           data: {
             value: `$DATA.value`,
             id: `$OPTIONS.id`,
-            idx: `$EVENT.dataset.idx`
+            idx: `$EVENT.dataset.idx`,
+          },
+        },
+      ],
+      methods: [
+        {
+          eventName: "tap-menu",
+          method: "onTabItemTap",
+          data: {
+            idx: "$EVENT.index",
+            path: "$EVENT.pagePath",
+          },
+        },
+      ],
+    },
+    {
+      path: "pages/logs/index",
+      methods: [
+        {
+          eventName: "tap-menu",
+          method: "onTabItemTap",
+          data: {
+            idx: "$EVENT.index",
+            path: "$EVENT.pagePath",
           },
         },
       ],
