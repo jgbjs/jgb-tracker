@@ -95,7 +95,7 @@ export default {
 
       components.forEach((component) => {
         config.injectComponent(component);
-        config.registerIntersectionObserver(component);
+        config.registerIntersectionObserver(component, false);
       });
     });
 
