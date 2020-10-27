@@ -76,6 +76,7 @@ export class Collector {
     if (mapFuns && mapFuns.has(m)) {
       return true;
     }
+    
     // 没有注册时，先初始化数据
     if (!mapFuns) {
       mapFuns = new Map();
@@ -98,7 +99,7 @@ export class Collector {
         const collectData = {
           ...m,
           data: reportData,
-          type: "METHOD" as IReportType
+          type: "METHOD" as IReportType,
         };
         this.notify(collectData);
       },
@@ -109,7 +110,7 @@ export class Collector {
     );
     // 默认 50ms 触发一次
     mapFuns.set(m, fn);
-    return false;
+    return Number(mapFuns?.size) > 1;
   }
   /**
    * 注册方法

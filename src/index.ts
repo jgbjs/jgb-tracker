@@ -8,6 +8,11 @@ import {
 import { addProcessConfigFn, config, IConfig } from "./config";
 import { safeGet } from "./utils";
 
+// 标志是否已经加载config
+let HAS_LOAD_CONFIG = false;
+// 未加载config之前已经attached的component
+const components = new Set();
+
 function init() {
   jgb.intercept("request", "success", (_, __, opts) => {
     const url: string = opts.url;
@@ -35,9 +40,32 @@ function init() {
       config.registerIntersectionObserver(this);
     },
   });
+
+  JComponent.mixin({
+    attached: function () {
+      if (!HAS_LOAD_CONFIG) {
+        components.add(this);
+      }
+      config.injectComponent(this);
+    },
+    ready: function () {
+      this.$registerObserver();
+    },
+    detached: function () {
+      if (!HAS_LOAD_CONFIG) {
+        components.delete(this);
+      }
+      config.destory(this);
+    },
+    methods: {
+      $registerObserver: function () {
+        return config.registerIntersectionObserver(this, false);
+      },
+    },
+  });
 }
 
-init()
+init();
 
 export default {
   /** 加载配置  */
@@ -51,35 +79,6 @@ export default {
    */
   init(opts: { configUrl?: string; localConfig?: IConfig }) {
     const configLoadPromise = this.loadConfig(opts);
-
-    // 标志是否已经加载config
-    let HAS_LOAD_CONFIG = false;
-    // 未加载config之前已经attached的component
-    const components = new Set();
-
-    JComponent.mixin({
-      attached() {
-        if (!HAS_LOAD_CONFIG) {
-          components.add(this);
-        }
-
-        config.injectComponent(this);
-      },
-      ready() {
-        this.$registerObserver();
-      },
-      detached() {
-        if (!HAS_LOAD_CONFIG) {
-          components.delete(this);
-        }
-        config.destory(this);
-      },
-      methods: {
-        $registerObserver() {
-          return config.registerIntersectionObserver(this, false);
-        },
-      },
-    });
 
     // 补全缺失的埋点
     configLoadPromise.then(() => {

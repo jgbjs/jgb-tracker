@@ -244,17 +244,19 @@ export class TrackerConfig {
     const method = m.method;
     const oldMethod = ctx[method];
 
-    collector.registerMethod(route, m);
+    const hasRegistered = collector.registerMethod(route, m);
 
-    const fn = function (this: any, ...args: any[]) {
-      if (typeof oldMethod === "function") {
-        oldMethod.apply(this, args);
-      }
+    if (!hasRegistered) {
+      const fn = function (this: any, ...args: any[]) {
+        if (typeof oldMethod === "function") {
+          oldMethod.apply(this, args);
+        }
 
-      collector.invokeMethod(route, method, [this, ...args]);
-    };
+        collector.invokeMethod(route, method, [this, ...args]);
+      };
 
-    ctx[method] = fn;
+      ctx[method] = fn;
+    }
   }
 
   /**

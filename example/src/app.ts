@@ -30,6 +30,14 @@ const localConfig: IConfig = {
             path: "$EVENT.pagePath",
           },
         },
+        {
+          eventName: "tap-menu-2",
+          method: "onTabItemTap",
+          data: {
+            idx: "$EVENT.index",
+            evtName: "'tap-menu-2'",
+          },
+        },
       ],
     },
     {
