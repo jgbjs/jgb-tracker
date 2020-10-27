@@ -135,6 +135,7 @@ interface ICacheData {
 }
 
 const OBSERVE_KEY = Symbol("observe");
+const INNER_INJECT_METHOD_REG = /function\s+_tracker_inject_method_\s*\(/;
 // const OBSERVE_QUEUE_DATA = Symbol("ob_queue_data");
 
 export class TrackerConfig {
@@ -244,10 +245,13 @@ export class TrackerConfig {
     const method = m.method;
     const oldMethod = ctx[method];
 
-    const hasRegistered = collector.registerMethod(route, m);
+    const hasRegistered =
+      typeof oldMethod === "function" &&
+      INNER_INJECT_METHOD_REG.test(oldMethod.toString());
+    collector.registerMethod(route, m);
 
     if (!hasRegistered) {
-      const fn = function (this: any, ...args: any[]) {
+      const fn = function _tracker_inject_method_(this: any, ...args: any[]) {
         if (typeof oldMethod === "function") {
           oldMethod.apply(this, args);
         }
